@@ -60,6 +60,7 @@ body {
 
 .comment-text {
   font-size: 32px;
+  white-space: pre-line;
 }
 
 .likes {
@@ -103,6 +104,19 @@ body {
   font-family: Helvetica;
   border-radius: 8px;
   border: none;
+}
+
+.quote-form-text {
+  font-size: 16px;
+  font-family: Helvetica;
+  border: none;
+  border-radius: 8px;
+  color: #000;
+  background-color: #fff;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  padding: 22px;
+  white-space: pre-line;
 }
 
 .add-form-name {
