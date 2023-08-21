@@ -4,6 +4,7 @@ const commentsArr = [
   {
     name: "Глеб Фокин",
     date: "12.02.22 12:18",
+    quote: "",
     comment: "Это будет первый комментарий на этой странице",
     likesCounter: 3,
     myLike: false,
@@ -12,6 +13,7 @@ const commentsArr = [
   {
     name: "Варвара Н.",
     date: "13.02.22 19:22",
+    quote: "",
     comment: "Мне нравится, как оформлена эта страница! ❤",
     likesCounter: 75,
     myLike: true,
@@ -25,36 +27,44 @@ const delFormBtn = document.querySelector(".del-form-button");
 const inputName = document.querySelector(".add-form-name");
 const inputText = document.querySelector(".add-form-text");
 
+let quoteGlobal = "";
+
 addFormBtn.disabled = true;
 
 const initEventListeners = () => {
-
-  const likeBtns = document.querySelectorAll(".like-button"); 
+  const likeBtns = document.querySelectorAll(".like-button");
   for (const likeBtn of likeBtns) {
-    likeBtn.addEventListener("click", () => {
-      const comment = commentsArr[likeBtn.dataset.index]; 
+    likeBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const comment = commentsArr[likeBtn.dataset.index];
       comment.myLike ? --comment.likesCounter : ++comment.likesCounter;
-      comment.myLike = !comment.myLike; 
-      renderComments(); 
+      comment.myLike = !comment.myLike;
+      renderComments();
     });
   }
 
   const editBtns = document.querySelectorAll(".edit-btn");
   for (const editBtn of editBtns) {
-    editBtn.addEventListener("click", () => {
-      const comment = commentsArr[editBtn.dataset.index];
+    editBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const index = editBtn.dataset.index;
+      const comment = commentsArr[index];
       comment.isEdit = true;
+
       renderComments();
-      // console.log(editBtn.closest('.comment'));
+      document.querySelector(".edit-form-text").focus();
     });
   }
 
   const saveBtns = document.querySelectorAll(".save-btn");
   for (const saveBtn of saveBtns) {
-    saveBtn.addEventListener("click", () => {
+    saveBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
       const comment = commentsArr[saveBtn.dataset.index];
 
-      const editFormText = saveBtn.closest('.comment').querySelector(".edit-form-text");
+      const editFormText = saveBtn
+        .closest(".comment")
+        .querySelector(".edit-form-text");
       comment.comment = editFormText.value;
 
       let currentDate = new Date();
@@ -62,6 +72,18 @@ const initEventListeners = () => {
 
       comment.isEdit = false;
       renderComments();
+    });
+  }
+
+  const commentTextElements = document.querySelectorAll(".comment-text");
+  for (const commentTextElement of commentTextElements) {
+    commentTextElement.addEventListener("click", () => {
+      const index = commentTextElement.dataset.index;
+      const comment = commentsArr[index];
+
+        quoteGlobal = `${comment.name}:\n${comment.comment}`;
+        inputText.value = `"${quoteGlobal}"\n`;
+        document.querySelector(".add-form-text").focus();
     });
   }
 };
@@ -93,14 +115,20 @@ const renderComments = () => {
                   <div>${comment.date}</div>
                 </div>
                   ${
+                    comment.quote
+                      ? `<div
+                        class="quote-form-text"
+                        rows="2"
+                        >${comment.quote}</div>`
+                      : ``
+                  }
+                  ${
                     comment.isEdit
                       ? `<textarea
-                        type="textarea"
                         class="edit-form-text"
                         rows="2"
-                        autofocus
                       >${comment.comment}</textarea>`
-                      : `<div class="comment-body"><div class="comment-text">${comment.comment}</div></div>`
+                      : `<div class="comment-body"><div class="comment-text" data-index="${index}">${comment.comment}</div></div>`
                   }
                 <div class="comment-footer">
                 ${
@@ -111,14 +139,15 @@ const renderComments = () => {
                   <div class="likes">
                     <span class="likes-counter">${comment.likesCounter}</span>
                     <button data-index="${index}" class='${
-                      comment.myLike ? "like-button -active-like" : "like-button"
-                    }'></button>
+        comment.myLike ? "like-button -active-like" : "like-button"
+      }'></button>
                   </div>
                 </div>
               </li>`;
     })
     .join("");
 
+  quoteGlobal = "";
   inputName.value = "";
   inputText.value = "";
   addFormBtn.disabled = true;
@@ -131,13 +160,24 @@ renderComments();
 const createNewComment = () => {
   let currentDate = new Date();
   commentsArr.push({
-    name: inputName.value,
+    name: inputName.value
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "")
+      .replaceAll(">", "")
+      .replaceAll('"', "&quot;"),
     date: now(currentDate),
-    comment: inputText.value,
+    quote: quoteGlobal,
+    comment: inputText.value
+      .replace(`"${quoteGlobal}"\n`, '')
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "")
+      .replaceAll(">", "")
+      .replaceAll('"', "&quot;"),
     likesCounter: 0,
     myLike: false,
     isEdit: false,
   });
+  console.log(commentsArr);
 };
 
 addFormBtn.addEventListener("click", () => {
