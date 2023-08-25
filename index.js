@@ -1,33 +1,36 @@
 "use strict";
 
-const commentsArr = [
-  {
-    name: "Глеб Фокин",
-    date: "12.02.22 12:18",
-    quote: "",
-    comment: "Это будет первый комментарий на этой странице",
-    likesCounter: 3,
-    myLike: false,
-    isEdit: false,
-  },
-  {
-    name: "Варвара Н.",
-    date: "13.02.22 19:22",
-    quote: "",
-    comment: "Мне нравится, как оформлена эта страница! ❤",
-    likesCounter: 75,
-    myLike: true,
-    isEdit: false,
-  },
+let commentsArr = [
 ];
+
 
 const comments = document.querySelector(".comments");
 const addFormBtn = document.querySelector(".add-form-button");
-const delFormBtn = document.querySelector(".del-form-button");
+// const delFormBtn = document.querySelector(".del-form-button");
 const inputName = document.querySelector(".add-form-name");
 const inputText = document.querySelector(".add-form-text");
 
-let quoteGlobal = "";
+const getApiComments = () => {
+  fetch("https://wedev-api.sky.pro/api/v1/pavel-palkin/comments", {
+    method: "GET",
+  }).then((response) => {
+    response.json().then((responseData) => {
+      commentsArr = responseData.comments.map((element) => {
+        return {
+          name: element.author.name,
+          comment: element.text,
+          date: now(new Date(element.date)),
+          likesCounter: element.likes,
+          myLike: element.isLiked,
+        };
+      });
+
+      // console.log(commentsArr);
+      renderComments();
+    });
+  });
+};
+getApiComments();
 
 addFormBtn.disabled = true;
 
@@ -43,49 +46,49 @@ const initEventListeners = () => {
     });
   }
 
-  const editBtns = document.querySelectorAll(".edit-btn");
-  for (const editBtn of editBtns) {
-    editBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const index = editBtn.dataset.index;
-      const comment = commentsArr[index];
-      comment.isEdit = true;
+  // const editBtns = document.querySelectorAll(".edit-btn");
+  // for (const editBtn of editBtns) {
+  //   editBtn.addEventListener("click", (e) => {
+  //     e.stopPropagation();
+  //     const index = editBtn.dataset.index;
+  //     const comment = commentsArr[index];
+  //     comment.isEdit = true;
 
-      renderComments();
-      document.querySelector(".edit-form-text").focus();
-    });
-  }
+  //     renderComments();
+  //     document.querySelector(".edit-form-text").focus();
+  //   });
+  // }
 
-  const saveBtns = document.querySelectorAll(".save-btn");
-  for (const saveBtn of saveBtns) {
-    saveBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const comment = commentsArr[saveBtn.dataset.index];
+  // const saveBtns = document.querySelectorAll(".save-btn");
+  // for (const saveBtn of saveBtns) {
+  //   saveBtn.addEventListener("click", (e) => {
+  //     e.stopPropagation();
+  //     const comment = commentsArr[saveBtn.dataset.index];
 
-      const editFormText = saveBtn
-        .closest(".comment")
-        .querySelector(".edit-form-text");
-      comment.comment = editFormText.value;
+  //     const editFormText = saveBtn
+  //       .closest(".comment")
+  //       .querySelector(".edit-form-text");
+  //     comment.comment = editFormText.value;
 
-      let currentDate = new Date();
-      comment.date = now(currentDate);
+  //     let currentDate = new Date();
+  //     comment.date = now(currentDate);
 
-      comment.isEdit = false;
-      renderComments();
-    });
-  }
+  //     comment.isEdit = false;
+  //     renderComments();
+  //   });
+  // }
 
-  const commentTextElements = document.querySelectorAll(".comment-text");
-  for (const commentTextElement of commentTextElements) {
-    commentTextElement.addEventListener("click", () => {
-      const index = commentTextElement.dataset.index;
-      const comment = commentsArr[index];
+  // const commentTextElements = document.querySelectorAll(".comment-text");
+  // for (const commentTextElement of commentTextElements) {
+  //   commentTextElement.addEventListener("click", () => {
+  //     const index = commentTextElement.dataset.index;
+  //     const comment = commentsArr[index];
 
-        quoteGlobal = `${comment.name}:\n${comment.comment}`;
-        inputText.value = `"${quoteGlobal}"\n`;
-        document.querySelector(".add-form-text").focus();
-    });
-  }
+  //     quoteGlobal = `${comment.name}:\n${comment.comment}`;
+  //     inputText.value = `"${quoteGlobal}"\n`;
+  //     document.querySelector(".add-form-text").focus();
+  //   });
+  // }
 };
 
 document.addEventListener("input", () => {
@@ -114,31 +117,13 @@ const renderComments = () => {
                   <div>${comment.name}</div>
                   <div>${comment.date}</div>
                 </div>
-                  ${
-                    comment.quote
-                      ? `<div
-                        class="quote-form-text"
-                        rows="2"
-                        >${comment.quote}</div>`
-                      : ``
-                  }
-                  ${
-                    comment.isEdit
-                      ? `<textarea
-                        class="edit-form-text"
-                        rows="2"
-                      >${comment.comment}</textarea>`
-                      : `<div class="comment-body"><div class="comment-text" data-index="${index}">${comment.comment}</div></div>`
-                  }
+                <div class="comment-body"><div class="comment-text" data-index="${index}">${
+        comment.comment
+      }</div></div>
                 <div class="comment-footer">
-                ${
-                  comment.isEdit
-                    ? `<button data-index="${index}" class='save-btn'>Сохранить изменения</button>`
-                    : `<button data-index="${index}" class='edit-btn'>Редактировать комментарий</button>`
-                }
                   <div class="likes">
-                    <span class="likes-counter">${comment.likesCounter}</span>
-                    <button data-index="${index}" class='${
+                   <span class="likes-counter">${comment.likesCounter}</span>
+                   <button data-index="${index}" class='${
         comment.myLike ? "like-button -active-like" : "like-button"
       }'></button>
                   </div>
@@ -147,37 +132,45 @@ const renderComments = () => {
     })
     .join("");
 
-  quoteGlobal = "";
   inputName.value = "";
   inputText.value = "";
   addFormBtn.disabled = true;
-  delFormBtn.disabled = false;
   initEventListeners();
 };
 
 renderComments();
 
 const createNewComment = () => {
-  let currentDate = new Date();
-  commentsArr.push({
-    name: inputName.value
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "")
-      .replaceAll(">", "")
-      .replaceAll('"', "&quot;"),
-    date: now(currentDate),
-    quote: quoteGlobal,
-    comment: inputText.value
-      .replace(`"${quoteGlobal}"\n`, '')
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "")
-      .replaceAll(">", "")
-      .replaceAll('"', "&quot;"),
-    likesCounter: 0,
-    myLike: false,
-    isEdit: false,
+  // let currentDate = new Date();
+  // commentsArr.push({
+  //   name: inputName.value
+  //     .replaceAll("&", "&amp;")
+  //     .replaceAll("<", "")
+  //     .replaceAll(">", "")
+  //     .replaceAll('"', "&quot;"),
+  //   date: now(currentDate),
+  //   comment: inputText.value
+  //     .replaceAll("&", "&amp;")
+  //     .replaceAll("<", "")
+  //     .replaceAll(">", "")
+  //     .replaceAll('"', "&quot;"),
+  //   likesCounter: 0,
+  //   myLike: false,
+  // });
+  // console.log(commentsArr);
+
+  fetch("https://wedev-api.sky.pro/api/v1/pavel-palkin/comments", {
+    method: "POST",
+    body: JSON.stringify({
+      text: inputText.value,
+      name: inputName.value,
+    }),
+  }).then((response) => {
+    response.json().then((responseData) => {
+      console.log(responseData);
+      getApiComments();
+    });
   });
-  console.log(commentsArr);
 };
 
 addFormBtn.addEventListener("click", () => {
@@ -195,8 +188,8 @@ document.addEventListener("keyup", (e) => {
   }
 });
 
-delFormBtn.addEventListener("click", () => {
-  commentsArr.pop();
-  renderComments();
-  if (!commentsArr) delFormBtn.disabled = true;
-});
+// delFormBtn.addEventListener("click", () => {
+//   commentsArr.pop();
+//   renderComments();
+//   if (!commentsArr) delFormBtn.disabled = true;
+// });
