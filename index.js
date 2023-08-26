@@ -1,20 +1,30 @@
 "use strict";
 
-let commentsArr = [
-];
+let commentsArr = [];
 
-
+const startLoader = document.querySelector(".start-loader");
+const commentLoader = document.querySelector(".comment-loader");
 const comments = document.querySelector(".comments");
 const addFormBtn = document.querySelector(".add-form-button");
+const addForm = document.querySelector(".add-form");
 // const delFormBtn = document.querySelector(".del-form-button");
 const inputName = document.querySelector(".add-form-name");
 const inputText = document.querySelector(".add-form-text");
 
-const getApiComments = () => {
+function delay(interval = 300) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, interval);
+  });
+}
+
+const getAndRenderComments = () => {
   fetch("https://wedev-api.sky.pro/api/v1/pavel-palkin/comments", {
     method: "GET",
-  }).then((response) => {
-    response.json().then((responseData) => {
+  })
+    .then((response) => response.json())
+    .then((responseData) => {
       commentsArr = responseData.comments.map((element) => {
         return {
           name: element.author.name,
@@ -22,15 +32,17 @@ const getApiComments = () => {
           date: now(new Date(element.date)),
           likesCounter: element.likes,
           myLike: element.isLiked,
+          isEdit: false,
         };
       });
-
-      // console.log(commentsArr);
+      startLoader.classList.add("start-loader-hidden");
       renderComments();
+      commentLoader.classList.add("comment-loader-hidden");
+      addForm.classList.remove("add-form-loader-hidden");
     });
-  });
 };
-getApiComments();
+
+getAndRenderComments();
 
 addFormBtn.disabled = true;
 
@@ -38,45 +50,49 @@ const initEventListeners = () => {
   const likeBtns = document.querySelectorAll(".like-button");
   for (const likeBtn of likeBtns) {
     likeBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const comment = commentsArr[likeBtn.dataset.index];
-      comment.myLike ? --comment.likesCounter : ++comment.likesCounter;
-      comment.myLike = !comment.myLike;
-      renderComments();
+      likeBtn.classList.add("-loading-like");
+      delay(1000).then(() => {
+        e.stopPropagation();
+        const comment = commentsArr[likeBtn.dataset.index];
+        comment.myLike ? --comment.likesCounter : ++comment.likesCounter;
+        comment.myLike = !comment.myLike;
+        likeBtn.classList.remove("-loading-like");
+        renderComments();
+      });
     });
   }
 
-  // const editBtns = document.querySelectorAll(".edit-btn");
-  // for (const editBtn of editBtns) {
-  //   editBtn.addEventListener("click", (e) => {
-  //     e.stopPropagation();
-  //     const index = editBtn.dataset.index;
-  //     const comment = commentsArr[index];
-  //     comment.isEdit = true;
+  const editBtns = document.querySelectorAll(".edit-btn");
+  for (const editBtn of editBtns) {
+    editBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const index = editBtn.dataset.index;
+      const comment = commentsArr[index];
+      comment.isEdit = true;
 
-  //     renderComments();
-  //     document.querySelector(".edit-form-text").focus();
-  //   });
-  // }
+      renderComments();
+      document.querySelector(".edit-form-text").focus();
+    });
+  }
 
-  // const saveBtns = document.querySelectorAll(".save-btn");
-  // for (const saveBtn of saveBtns) {
-  //   saveBtn.addEventListener("click", (e) => {
-  //     e.stopPropagation();
-  //     const comment = commentsArr[saveBtn.dataset.index];
+  const saveBtns = document.querySelectorAll(".save-btn");
+  for (const saveBtn of saveBtns) {
+    saveBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const comment = commentsArr[saveBtn.dataset.index];
 
-  //     const editFormText = saveBtn
-  //       .closest(".comment")
-  //       .querySelector(".edit-form-text");
-  //     comment.comment = editFormText.value;
+      const editFormText = saveBtn
+        .closest(".comment")
+        .querySelector(".edit-form-text");
+      comment.comment = editFormText.value;
 
-  //     let currentDate = new Date();
-  //     comment.date = now(currentDate);
+      let currentDate = new Date();
+      comment.date = now(currentDate);
 
-  //     comment.isEdit = false;
-  //     renderComments();
-  //   });
-  // }
+      comment.isEdit = false;
+      renderComments();
+    });
+  }
 
   // const commentTextElements = document.querySelectorAll(".comment-text");
   // for (const commentTextElement of commentTextElements) {
@@ -117,11 +133,25 @@ const renderComments = () => {
                   <div>${comment.name}</div>
                   <div>${comment.date}</div>
                 </div>
-                <div class="comment-body"><div class="comment-text" data-index="${index}">${
-        comment.comment
-      }</div></div>
+                ${
+                  comment.isEdit
+                    ? `<textarea
+                      class="edit-form-text"
+                      rows="2"
+                    >${comment.comment}</textarea>`
+                    : `<div class="comment-body">
+                      <div class="comment-text" data-index="${index}">
+                        ${comment.comment}
+                      </div>
+                    </div>`
+                }
                 <div class="comment-footer">
-                  <div class="likes">
+                ${
+                  comment.isEdit
+                    ? `<button data-index="${index}" class='save-btn'>Сохранить изменения</button>`
+                    : `<button data-index="${index}" class='edit-btn'>Редактировать комментарий</button>`
+                }
+                <div class="likes">
                    <span class="likes-counter">${comment.likesCounter}</span>
                    <button data-index="${index}" class='${
         comment.myLike ? "like-button -active-like" : "like-button"
@@ -137,8 +167,6 @@ const renderComments = () => {
   addFormBtn.disabled = true;
   initEventListeners();
 };
-
-renderComments();
 
 const createNewComment = () => {
   // let currentDate = new Date();
@@ -159,23 +187,25 @@ const createNewComment = () => {
   // });
   // console.log(commentsArr);
 
+  addForm.classList.add("add-form-loader-hidden");
+  commentLoader.classList.remove("comment-loader-hidden");
+
   fetch("https://wedev-api.sky.pro/api/v1/pavel-palkin/comments", {
     method: "POST",
     body: JSON.stringify({
       text: inputText.value,
       name: inputName.value,
     }),
-  }).then((response) => {
-    response.json().then((responseData) => {
+  })
+    .then((response) => response.json())
+    .then((responseData) => {
       console.log(responseData);
-      getApiComments();
+      getAndRenderComments();
     });
-  });
 };
 
 addFormBtn.addEventListener("click", () => {
   createNewComment();
-  renderComments();
 });
 
 document.addEventListener("keyup", (e) => {
@@ -184,7 +214,6 @@ document.addEventListener("keyup", (e) => {
     !addFormBtn.disabled
   ) {
     createNewComment();
-    renderComments();
   }
 });
 

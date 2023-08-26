@@ -50,7 +50,7 @@ body {
 
 .comment-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
 }
 
 .comment-body {
@@ -171,4 +171,33 @@ body {
 .add-form-button:disabled,
 .del-form-button:disabled {
   background-color: #E0E0E0;
+}
+
+.start-loader-hidden,
+.add-form-loader-hidden,
+.comment-loader-hidden {
+  display: none;
+}
+
+.comment-loader {
+  padding-top: 25px;
+}
+
+@keyframes rotating {
+  from {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(30deg);;
+  }
+  75% {
+    transform: rotate(-30deg);;
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.-loading-like {
+  animation: rotating 2s linear infinite;
 }
