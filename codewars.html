@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      function solution(str) {
+        const resultArr = [];
+        for (let i = 0; i < str.length; i +=2) {
+          resultArr.push(`${str[i]+(str[i+1] || '_')}`);
+        }
+        return resultArr;
+      }
+
+      console.log(solution("abcdef"));
+      console.log(solution("abcdefg"));
+    </script>
+  </body>
+</html>
