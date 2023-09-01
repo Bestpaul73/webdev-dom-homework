@@ -23,7 +23,14 @@ const getAndRenderComments = () => {
   fetch("https://wedev-api.sky.pro/api/v1/pavel-palkin/comments", {
     method: "GET",
   })
-    .then((response) => response.json())
+    .then((response) => {
+      console.log(response);
+      if (response.status === 200) {
+        return response.json();
+      } else {
+        throw new Error("Сервер сломался, попробуй позже");
+      }
+    })
     .then((responseData) => {
       commentsArr = responseData.comments.map((element) => {
         return {
@@ -37,9 +44,13 @@ const getAndRenderComments = () => {
       });
       startLoader.classList.add("start-loader-hidden");
       renderComments();
-      commentLoader.classList.add("comment-loader-hidden");
-      addForm.classList.remove("add-form-loader-hidden");
+    })
+    .catch((error) => {
+      alert(error.message);
+      console.warn(error.message);
     });
+  // commentLoader.classList.add("comment-loader-hidden");
+  // addForm.classList.remove("add-form-loader-hidden");
 };
 
 getAndRenderComments();
@@ -195,12 +206,48 @@ const createNewComment = () => {
     body: JSON.stringify({
       text: inputText.value,
       name: inputName.value,
+      forceError: true,
     }),
   })
-    .then((response) => response.json())
+    .then((response) => {
+      console.log(response);
+      if (response.status === 201) {
+        return response.json();
+      }
+      if (response.status === 400) {
+        throw new Error(`Имя и комментарий должны быть не короче 3 символов`);
+      }
+      if (response.status === 500) {
+        throw new Error(`Сервер сломался, попробуй позже`);
+      }
+    })
     .then((responseData) => {
       console.log(responseData);
       getAndRenderComments();
+      commentLoader.classList.add("comment-loader-hidden");
+      addForm.classList.remove("add-form-loader-hidden");
+    })
+    .catch((error) => {
+      if (
+        error.message === "Имя и комментарий должны быть не короче 3 символов"
+      ) {
+        alert(error.message);
+      }
+
+      if (error.message === "Сервер сломался, попробуй позже") {
+        alert(error.message);
+        // Пробуем снова, если сервер сломался
+        createNewComment();
+      }
+
+      if (window.navigator.onLine === false) {
+        alert("Проблемы с интернетом, проверьте подключение");
+      }
+      
+      console.warn(error);
+
+      commentLoader.classList.add("comment-loader-hidden");
+      addForm.classList.remove("add-form-loader-hidden");
     });
 };
 
