@@ -1,7 +1,7 @@
-import { now } from "./time.js";
 import { getComments } from "./api.js";
 import { renderLogin } from "./renderLogin.js";
 import { initComments } from "./initComments.js";
+import { format } from 'date-fns';
 
 const invitationHTML = `<div class="invitation">Чтобы добавить комментарий, <span class="invitation-button">авторизуйтесь</span></div>`;
 const addFormHTML = `
@@ -44,7 +44,7 @@ export const getAndRenderComments = (commentsArr) => {
         return {
           name: element.author.name,
           comment: element.text,
-          date: now(new Date(element.date)),
+          date: format(new Date(element.date), `yyyy-MM-dd hh.mm.ss`),
           likesCounter: element.likes,
           myLike: element.isLiked,
           isEdit: false,
