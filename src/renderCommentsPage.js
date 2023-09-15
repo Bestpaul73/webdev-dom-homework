@@ -1,6 +1,6 @@
-import { getComments } from "./api.js";
-import { renderLogin } from "./renderLogin.js";
-import { initComments } from "./initComments.js";
+import { getComments } from './api.js';
+import { renderLogin } from './renderLogin.js';
+import { initComments } from './initComments.js';
 import { format } from 'date-fns';
 
 const invitationHTML = `<div class="invitation">Чтобы добавить комментарий, <span class="invitation-button">авторизуйтесь</span></div>`;
@@ -30,8 +30,8 @@ export let commentsArr = [];
 // export let userName = null;
 export let userName;
 const getUserFromLocalStorage = () => {
-  return userName = localStorage.getItem('userName');
-}
+  return (userName = localStorage.getItem('userName'));
+};
 userName = getUserFromLocalStorage();
 export const setUserName = (userNewName) => {
   userName = userNewName;
@@ -59,16 +59,14 @@ export const getAndRenderComments = (commentsArr) => {
     });
 };
 
-
-
 export const renderCommentsPage = (commentsArr) => {
-  const containerElement = document.querySelector(".container");
+  const containerElement = document.querySelector('.container');
   containerElement.innerHTML = `
   <ul class="comments"></ul>
   ${userName ? addFormHTML : invitationHTML}
   `;
 
-  const comments = document.querySelector(".comments");
+  const comments = document.querySelector('.comments');
   comments.innerHTML = commentsArr
     .map((comment, index) => {
       return `<li class="comment">
@@ -90,23 +88,23 @@ export const renderCommentsPage = (commentsArr) => {
     }
         <div class="comment-footer">
           ${
-          comment.isEdit
-            ? `<button data-index="${index}" class='save-btn'>Сохранить изменения</button>`
-            : `<button data-index="${index}" class='edit-btn'>Редактировать комментарий</button>`
-        }
+            comment.isEdit
+              ? `<button data-index="${index}" class='save-btn'>Сохранить изменения</button>`
+              : `<button data-index="${index}" class='edit-btn'>Редактировать комментарий</button>`
+          }
         <div class="likes">
         <span class="likes-counter">${comment.likesCounter}</span>
         <button data-index="${index}" class='${
-        comment.myLike ? "like-button -active-like" : "like-button"
-      }'></button>
+          comment.myLike ? 'like-button -active-like' : 'like-button'
+        }'></button>
         </div>
         </div>
         </li>`;
     })
-    .join("");
+    .join('');
 
   if (!userName) {
-    const invitationButton = document.querySelector(".invitation-button");
+    const invitationButton = document.querySelector('.invitation-button');
     invitationButton.addEventListener(`click`, () => {
       renderLogin();
     });

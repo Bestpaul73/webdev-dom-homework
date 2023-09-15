@@ -10,19 +10,19 @@ export const setToken = (newToken) => {
 
 export const getComments = () => {
   return fetch(`${baseURL}/comments`, {
-    method: "GET",
+    method: 'GET',
   }).then((response) => {
     if (response.status === 200) {
       return response.json();
     } else {
-      throw new Error("Сервер сломался, попробуй позже");
+      throw new Error('Сервер сломался, попробуй позже');
     }
   });
 };
 
 export const addComment = ({ text }) => {
   return fetch(`${baseURL}/comments`, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify({
       text: text,
       //   forceError: true,
@@ -42,14 +42,14 @@ export const addComment = ({ text }) => {
       throw new Error(`Сервер сломался, попробуй позже`);
     }
     if (response.status === 401) {
-      console.log("я тут");
+      console.log('я тут');
     }
   });
 };
 
 export function login({ login, password }) {
   return fetch(loginURL, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify({
       login,
       password,
@@ -64,14 +64,14 @@ export function login({ login, password }) {
       throw new Error(`Нет авторизации`);
     }
     if (response.status === 500) {
-      throw new Error("Сервер сломался, попробуй позже");
+      throw new Error('Сервер сломался, попробуй позже');
     }
   });
 }
 
-export function registration ({ name, login, password }) {
+export function registration({ name, login, password }) {
   return fetch(registerURL, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify({
       name,
       login,
@@ -87,7 +87,7 @@ export function registration ({ name, login, password }) {
       throw new Error(`Пользователь с таким логином уже существует`);
     }
     if (response.status === 500) {
-      throw new Error("Сервер сломался, попробуй позже");
+      throw new Error('Сервер сломался, попробуй позже');
     }
   });
 }
