@@ -29,12 +29,21 @@ export let commentsArr = [];
 
 // export let userName = null;
 export let userName;
-const getUserFromLocalStorage = () => {
+const getUserNameFromLocalStorage = () => {
   return (userName = localStorage.getItem('userName'));
 };
-userName = getUserFromLocalStorage();
+userName = getUserNameFromLocalStorage();
 export const setUserName = (userNewName) => {
-  userName = userNewName;
+  return userName = userNewName;
+};
+
+export let token;
+const getUserTokenFromLocalStorage = () => {
+  return (token = localStorage.getItem('userToken'));
+};
+token = getUserTokenFromLocalStorage();
+export const setToken = (newToken) => {
+  return token = newToken;
 };
 
 export const getAndRenderComments = (commentsArr) => {
@@ -42,6 +51,7 @@ export const getAndRenderComments = (commentsArr) => {
     .then((responseData) => {
       commentsArr = responseData.comments.map((element) => {
         return {
+          id: element.id,
           name: element.author.name,
           comment: element.text,
           date: format(new Date(element.date), `yyyy-MM-dd hh.mm.ss`),
@@ -60,6 +70,7 @@ export const getAndRenderComments = (commentsArr) => {
 };
 
 export const renderCommentsPage = (commentsArr) => {
+  console.log(commentsArr);
   const containerElement = document.querySelector('.container');
   containerElement.innerHTML = `
   <ul class="comments"></ul>
@@ -92,6 +103,7 @@ export const renderCommentsPage = (commentsArr) => {
               ? `<button data-index="${index}" class='save-btn'>Сохранить изменения</button>`
               : `<button data-index="${index}" class='edit-btn'>Редактировать комментарий</button>`
           }
+        <button data-index="${index}" class="bin-button"><img src="./img/free-icon-delete-1345925.png" alt=""></button>  
         <div class="likes">
         <span class="likes-counter">${comment.likesCounter}</span>
         <button data-index="${index}" class='${

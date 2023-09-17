@@ -1,9 +1,10 @@
 import _ from 'lodash';
-import { login, registration, setToken } from './api.js';
+import { login, registration } from './api.js';
 import {
   getAndRenderComments,
   setUserName,
   commentsArr,
+  setToken,
 } from './renderCommentsPage.js';
 
 const loginFormHTML = `
@@ -66,10 +67,16 @@ export const renderLogin = () => {
       password: passwordInputElement.value,
     })
       .then((responseData) => {
+        
+        console.log(responseData.user.token);
+        console.log(responseData.user.name);
+        
         setToken(responseData.user.token);
         setUserName(responseData.user.name);
-        if (confirm(`Запомнить пользователя на этом компьютере?`))
+        if (confirm(`Запомнить пользователя на этом компьютере?`)) {
           localStorage.setItem('userName', responseData.user.name);
+          localStorage.setItem('userToken', responseData.user.token);
+        }
         getAndRenderComments(commentsArr);
       })
       .catch((error) => {

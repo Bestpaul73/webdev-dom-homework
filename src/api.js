@@ -2,12 +2,6 @@ const baseURL = `https://wedev-api.sky.pro/api/v2/pavel-palkin`;
 const registerURL = `https://wedev-api.sky.pro/api/user`;
 const loginURL = `https://wedev-api.sky.pro/api/user/login`;
 
-let token;
-
-export const setToken = (newToken) => {
-  token = newToken;
-};
-
 export const getComments = () => {
   return fetch(`${baseURL}/comments`, {
     method: 'GET',
@@ -20,7 +14,7 @@ export const getComments = () => {
   });
 };
 
-export const addComment = ({ text }) => {
+export const addComment = ({ text, token }) => {
   return fetch(`${baseURL}/comments`, {
     method: 'POST',
     body: JSON.stringify({
@@ -31,7 +25,6 @@ export const addComment = ({ text }) => {
       Authorization: `Bearer ${token}`,
     },
   }).then((response) => {
-    console.log(response);
     if (response.status === 201) {
       return response.json();
     }
@@ -47,6 +40,22 @@ export const addComment = ({ text }) => {
   });
 };
 
+export const delComment = ({ commentID, token }) => {
+  return fetch(`${baseURL}/comments/${commentID}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }).then((response) => {
+    if (response.status === 401) {
+      throw new Error(`Ошибка авторизации`);
+    }
+    if (response.status === 500) {
+      throw new Error('Сервер сломался, попробуй позже');
+    }
+  });
+};
+
 export function login({ login, password }) {
   return fetch(loginURL, {
     method: 'POST',
@@ -55,8 +64,6 @@ export function login({ login, password }) {
       password,
     }),
   }).then((response) => {
-    console.log(response);
-
     if (response.status === 201) {
       return response.json();
     }
