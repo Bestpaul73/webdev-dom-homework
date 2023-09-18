@@ -2,27 +2,21 @@ const baseURL = `https://wedev-api.sky.pro/api/v2/pavel-palkin`;
 const registerURL = `https://wedev-api.sky.pro/api/user`;
 const loginURL = `https://wedev-api.sky.pro/api/user/login`;
 
-let token;
-
-export const setToken = (newToken) => {
-  token = newToken;
-};
-
 export const getComments = () => {
   return fetch(`${baseURL}/comments`, {
-    method: "GET",
+    method: 'GET',
   }).then((response) => {
     if (response.status === 200) {
       return response.json();
     } else {
-      throw new Error("Сервер сломался, попробуй позже");
+      throw new Error('Сервер сломался, попробуй позже');
     }
   });
 };
 
-export const addComment = ({ text }) => {
+export const addComment = ({ text, token }) => {
   return fetch(`${baseURL}/comments`, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify({
       text: text,
       //   forceError: true,
@@ -31,7 +25,6 @@ export const addComment = ({ text }) => {
       Authorization: `Bearer ${token}`,
     },
   }).then((response) => {
-    console.log(response);
     if (response.status === 201) {
       return response.json();
     }
@@ -42,21 +35,35 @@ export const addComment = ({ text }) => {
       throw new Error(`Сервер сломался, попробуй позже`);
     }
     if (response.status === 401) {
-      console.log("я тут");
+      console.log('я тут');
+    }
+  });
+};
+
+export const delComment = ({ commentID, token }) => {
+  return fetch(`${baseURL}/comments/${commentID}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }).then((response) => {
+    if (response.status === 401) {
+      throw new Error(`Ошибка авторизации`);
+    }
+    if (response.status === 500) {
+      throw new Error('Сервер сломался, попробуй позже');
     }
   });
 };
 
 export function login({ login, password }) {
   return fetch(loginURL, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify({
       login,
       password,
     }),
   }).then((response) => {
-    console.log(response);
-
     if (response.status === 201) {
       return response.json();
     }
@@ -64,14 +71,14 @@ export function login({ login, password }) {
       throw new Error(`Нет авторизации`);
     }
     if (response.status === 500) {
-      throw new Error("Сервер сломался, попробуй позже");
+      throw new Error('Сервер сломался, попробуй позже');
     }
   });
 }
 
-export function registration ({ name, login, password }) {
+export function registration({ name, login, password }) {
   return fetch(registerURL, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify({
       name,
       login,
@@ -87,7 +94,7 @@ export function registration ({ name, login, password }) {
       throw new Error(`Пользователь с таким логином уже существует`);
     }
     if (response.status === 500) {
-      throw new Error("Сервер сломался, попробуй позже");
+      throw new Error('Сервер сломался, попробуй позже');
     }
   });
 }

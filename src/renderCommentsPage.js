@@ -1,7 +1,7 @@
-import { now } from "./time.js";
-import { getComments } from "./api.js";
-import { renderLogin } from "./renderLogin.js";
-import { initComments } from "./initComments.js";
+import { getComments } from './api.js';
+import { renderLogin } from './renderLogin.js';
+import { initComments } from './initComments.js';
+import { format } from 'date-fns';
 
 const invitationHTML = `<div class="invitation">Чтобы добавить комментарий, <span class="invitation-button">авторизуйтесь</span></div>`;
 const addFormHTML = `
@@ -29,12 +29,21 @@ export let commentsArr = [];
 
 // export let userName = null;
 export let userName;
-const getUserFromLocalStorage = () => {
-  return userName = localStorage.getItem('userName');
-}
-userName = getUserFromLocalStorage();
+const getUserNameFromLocalStorage = () => {
+  return (userName = localStorage.getItem('userName'));
+};
+userName = getUserNameFromLocalStorage();
 export const setUserName = (userNewName) => {
-  userName = userNewName;
+  return userName = userNewName;
+};
+
+export let token;
+const getUserTokenFromLocalStorage = () => {
+  return (token = localStorage.getItem('userToken'));
+};
+token = getUserTokenFromLocalStorage();
+export const setToken = (newToken) => {
+  return token = newToken;
 };
 
 export const getAndRenderComments = (commentsArr) => {
@@ -42,9 +51,10 @@ export const getAndRenderComments = (commentsArr) => {
     .then((responseData) => {
       commentsArr = responseData.comments.map((element) => {
         return {
+          id: element.id,
           name: element.author.name,
           comment: element.text,
-          date: now(new Date(element.date)),
+          date: format(new Date(element.date), `yyyy-MM-dd hh.mm.ss`),
           likesCounter: element.likes,
           myLike: element.isLiked,
           isEdit: false,
@@ -59,16 +69,15 @@ export const getAndRenderComments = (commentsArr) => {
     });
 };
 
-
-
 export const renderCommentsPage = (commentsArr) => {
-  const containerElement = document.querySelector(".container");
+  console.log(commentsArr);
+  const containerElement = document.querySelector('.container');
   containerElement.innerHTML = `
   <ul class="comments"></ul>
   ${userName ? addFormHTML : invitationHTML}
   `;
 
-  const comments = document.querySelector(".comments");
+  const comments = document.querySelector('.comments');
   comments.innerHTML = commentsArr
     .map((comment, index) => {
       return `<li class="comment">
@@ -90,23 +99,24 @@ export const renderCommentsPage = (commentsArr) => {
     }
         <div class="comment-footer">
           ${
-          comment.isEdit
-            ? `<button data-index="${index}" class='save-btn'>Сохранить изменения</button>`
-            : `<button data-index="${index}" class='edit-btn'>Редактировать комментарий</button>`
-        }
+            comment.isEdit
+              ? `<button data-index="${index}" class='save-btn'>Сохранить изменения</button>`
+              : `<button data-index="${index}" class='edit-btn'>Редактировать комментарий</button>`
+          }
+        <button data-index="${index}" class="bin-button"><img src="./img/free-icon-delete-1345925.png" alt=""></button>  
         <div class="likes">
         <span class="likes-counter">${comment.likesCounter}</span>
         <button data-index="${index}" class='${
-        comment.myLike ? "like-button -active-like" : "like-button"
-      }'></button>
+          comment.myLike ? 'like-button -active-like' : 'like-button'
+        }'></button>
         </div>
         </div>
         </li>`;
     })
-    .join("");
+    .join('');
 
   if (!userName) {
-    const invitationButton = document.querySelector(".invitation-button");
+    const invitationButton = document.querySelector('.invitation-button');
     invitationButton.addEventListener(`click`, () => {
       renderLogin();
     });

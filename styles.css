@@ -233,3 +233,8 @@ body {
   cursor: pointer;
 }
 
+.bin-button {
+  background: transparent;
+  border: none;
+}
+
